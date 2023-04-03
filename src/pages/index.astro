@@ -1,0 +1,33 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Post from "../components/Post.astro";
+import post_data from "../data/posts.json";
+const images = import.meta.glob<ImageMetadata>("../assets/*", {
+	import: "default",
+});
+const pd: PostData[] = post_data;
+---
+
+<Layout title="Welcome to my self-hosted photo gallery.">
+	<ul role="list" class="link-card-grid">
+		{
+			pd.map(async (elt) => (
+				<Post
+					post={elt}
+					isPreview={true}
+					href={`/posts/${elt.id}`}
+					img={await images[`../assets/${elt.id}.jpg`]()}
+				/>
+			))
+		}
+	</ul>
+</Layout>
+
+<style>
+	.link-card-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(24ch, 1fr));
+		gap: 1rem;
+		padding: 0;
+	}
+</style>

@@ -1,0 +1,43 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Post from "../../components/Post.astro";
+import post_data from "../../data/posts.json";
+
+const pd: PostData[] = post_data;
+const images = import.meta.glob<ImageMetadata>("../../assets/*", {
+	import: "default",
+});
+
+// Called at build time to enumerate all posts that need
+// to be pre-rendered.
+// This executes in its own isolated scope once, 
+// before any page loads. Therefore you can’t reference anything from
+// its parent scope, other than file imports.
+export function getStaticPaths() {
+	return post_data.map((elt) => {
+		return {
+			params: { post: elt.id },
+		};
+	});
+}
+
+const { post } = Astro.params;
+const this_image = await images[`../../assets/${post}.jpg`]();
+const post_element = pd.find((elt) => elt.id == post) || {
+	id: "unknown",
+	caption: "unknown",
+	media_type: "unknown",
+	media_url: "unknown",
+	permalink: "unknown",
+	timestamp: "unknown",
+};
+---
+
+<Layout title={`Post from ${post_element.timestamp}`}>
+	<Post
+		isPreview={false}
+		post={post_element}
+		href={post_element.permalink || "#"}
+		img={this_image}
+	/>
+</Layout>
